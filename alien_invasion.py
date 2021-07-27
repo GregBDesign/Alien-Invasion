@@ -12,6 +12,8 @@ from ship import Ship
 from bullet import Bullet
 from alien import Alien
 
+highScore = 'high_score.txt'
+
 class AlienInvasion:
     """Class to manage game assets and behaviour"""
 
@@ -71,6 +73,8 @@ class AlienInvasion:
             self.stats.reset_stats()
             self.stats.game_active = True
             self.sb.prep_score()
+            self.sb.prep_level()
+            self.sb.prep_ships()
 
             # Get rid of remaining bullets and aliens
             self.aliens.empty()
@@ -90,7 +94,7 @@ class AlienInvasion:
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = True
         elif event.key == pygame.K_q:
-            sys.exit()
+            self._finish_game()
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()
 
@@ -130,12 +134,17 @@ class AlienInvasion:
             for aliens in collisions.values():
                 self.stats.score += self.settings.alien_points * len(aliens)
             self.sb.prep_score()
+            self.sb.check_high_score()
 
         if not self.aliens:
             # Destroy existing bullets and create new fleet
             self.bullets.empty()
             self._create_fleet()
             self.settings.increase_speed()
+
+            # Increase level
+            self.stats.level += 1
+            self.sb.prep_level()
 
     def _update_aliens(self):
         """Check if fleet is at an edge,
@@ -195,8 +204,9 @@ class AlienInvasion:
     def _ship_hit(self):
         """Respond to the ship being hit by an alien"""
         if self.stats.ships_left > 0:
-            # Decrement remaining ships
+            # Decrement remaining ships and update scoreboard
             self.stats.ships_left -= 1
+            self.sb.prep_ships()
 
             # Get rid of remaining bullets and aliens
             self.aliens.empty()
@@ -238,6 +248,12 @@ class AlienInvasion:
 
         # Make most recently drawn screen visible
         pygame.display.flip()
+
+    def _finish_game(self):
+        """Write high score to file and quit game"""
+        with open(highScore, 'w') as file_obj:
+            file_obj.write(str(self.stats.high_score))
+        sys.exit()
 
 if __name__ == '__main__':
     # Make a game instance and run it

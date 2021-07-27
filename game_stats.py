@@ -1,3 +1,5 @@
+highScore = 'high_score.txt'
+
 class GameStats:
     """Track stats throughout the game"""
 
@@ -9,7 +11,12 @@ class GameStats:
         # Start game in active state
         self.game_active = False
 
+        # High score should never be reset
+        with open(highScore) as file_obj:
+            self.high_score = int(file_obj.read())
+
     def reset_stats(self):
         """Initialise statistics that can change during gameplay"""
         self.ships_left = self.settings.ship_limit
         self.score = 0
+        self.level = 1
