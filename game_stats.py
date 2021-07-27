@@ -11,7 +11,7 @@ class GameStats:
         # Start game in active state
         self.game_active = False
 
-        # High score should never be reset
+        # High score stored in external file and opened at start of game
         with open(highScore) as file_obj:
             self.high_score = int(file_obj.read())
 
